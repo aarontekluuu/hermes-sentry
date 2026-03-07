@@ -1333,7 +1333,7 @@ def cmd_add_contract(args: argparse.Namespace) -> None:
         "is_proxy": is_proxy,
         "impl_address": impl_addr,
         "code_hash": code_hash[:16] + "..." if code_hash else None,
-        "balance_eth": f"{balance:.6f}" if balance else None,
+        "balance_eth": f"{balance:.6f}" if balance is not None else None,
     }
     if token_balances:
         result["token_balances"] = token_balances
@@ -1376,7 +1376,7 @@ def cmd_add_wallet(args: argparse.Namespace) -> None:
     result = {
         "ok": True,
         "message": f"Now watching wallet {target_id}",
-        "balance_eth": f"{balance:.6f}" if balance else None,
+        "balance_eth": f"{balance:.6f}" if balance is not None else None,
     }
     if token_balances:
         result["token_balances"] = token_balances
@@ -1457,7 +1457,7 @@ def cmd_watch_multi(args: argparse.Namespace) -> None:
                 results.append({
                     "chain": chain, "type": "contract",
                     "is_proxy": impl_addr is not None,
-                    "balance": f"{balance:.6f}" if balance else None,
+                    "balance": f"{balance:.6f}" if balance is not None else None,
                     "tokens": token_balances if token_balances else None,
                 })
             else:

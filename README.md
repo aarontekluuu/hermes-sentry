@@ -122,77 +122,66 @@ $ sentry watch-multi --address 0xd8dA...96045 --chains base,ethereum --label "vi
 
 ### Poll with Significance Scores
 ```
-🔔 Sentry: 3 alerts from 6 targets
+🔔 Sentry: 1 alert from 6 targets
 
-🟡 NousResearch/hermes-agent — 25 new commits
+🟢 NousResearch/hermes-agent — 16 new commits
 ━━━━━━━━━━━━━━━━━━━━━
-Significance: ██████░░░░ 6/10
-🔑 Top change: Code changes with tests across 5 directories (15 files, +33085/-260)
+Significance: ███████░░░ 8/10
+🔑 Top change: Modifies existing code in hermes_cli/ (2 files, +552/-431)
 
-  🟢 ce28f847 [3/10] — fix: update OpenRouter model names for yc-bench config
-  🟡 388dd478 [6/10] — feat: add z.ai/GLM, Kimi/Moonshot, MiniMax as first-class providers
-  🟢 fdebca45 [4/10] — fix: implement Nous credential refresh on 401 error
-  🟡 94053d75 [5/10] — fix: custom endpoint no longer leaks OPENROUTER_API_KEY
-  ... +21 more
+  🟢 caab1cf4 [3/10] — fix: update setup/config UI for local browser mode
+  🟢 55c70f35 [3/10] — fix: strip MarkdownV2 escapes from Telegram plaintext fallback
+  🟢 d29249b8 [5/10] — feat: local browser backend — zero-cost headless Chromium via agent-browser
+  🟢 f668e9fc [5/10] — feat: platform-conditional skill loading + Apple/macOS skills
+  ⚪ 74fe1e22 [2/10] — chore: remove TODO.md — all items tracked as issues
+  🟢 34893675 [3/10] — fix: simplify timezone migration to use os.getenv directly
+  ... +10 more
 
-Files: 112 changed (+33085 -260)
-Authors: Teknium, Robin Fernandes, 0xbyt4, teknium1
-
-🟡 📈 DAO Treasury — USDC
-━━━━━━━━━━━━━━━━━━━━━
-Significance: ███████░░░ 7/10
-Chain: ethereum
-Address: 0x28849d2b...5642
-
-75547.26 → 52103.84 USDC
-Change: -31.0%
-
-https://etherscan.io/address/0x28849d2b...5642
+Files: 38 changed (+4736 -2401)
+Authors: teknium1, Teknium
+https://github.com/NousResearch/hermes-agent/commits
 ```
 
 ### Daily Digest with Trends
 ```
 📊 SENTRY DAILY DIGEST — 2026-03-07
 ━━━━━━━━━━━━━━━━━━━━━
-Watching: 3 repos, 3 contracts, 2 wallets
-Total alerts (24h): 8
+Watching: 3 repos, 3 contracts, 0 wallets
+Total alerts (24h): 6
 
 📈 TRENDS & PATTERNS
-  🏆 Most active: NousResearch/hermes-agent (3 alerts)
-  📊 Avg significance: 5.8/10
-  🚨 Critical alerts: 1
-  👥 Active contributors: teknium1, Robin Fernandes, Ava Chow
-  📝 Total files changed: 303
+  🏆 Most active: NousResearch/hermes-agent (2 alerts)
+  📊 Avg significance: 7.3/10
+  🚨 Critical alerts: 2
+  👥 Active contributors: Christian Loehle, Dave Airlie, teknium1, furszy, Robin Fernandes
+  📝 Total files changed: 341
 
   ⚠️ ANOMALIES:
-    • 💸 Large balance movements: 1 critical treasury/wallet change
-    • ⚡ Unusually high activity: 4 high-significance events
+    • 💸 Large balance movements: 2 critical treasury/wallet changes
 
-🔴 CRITICAL (1)
-  • [10/10] Aave V3 Pool: contract_upgrade
+🔴 CRITICAL (2)
+  • [7/10] vitalik.eth (Base): token_balance_change
+  • [7/10] vitalik.eth (Ethereum): token_balance_change
 
-🟡 WARNING (4)
-  • [6/10] NousResearch/hermes-agent: commit_batch
-  • [7/10] DAO Treasury: token_balance_change
-  • [5/10] torvalds/linux: commit_batch
-  • [6/10] vitalik.eth: event_logs
+🟡 WARNING (2)
+  • [8/10] NousResearch/hermes-agent: commit_batch
+  • [?/10] torvalds/linux: commit_batch
 
-🟢 INFO (3)
-  • [4/10] bitcoin/bitcoin: commit_batch
-  • [3/10] Uniswap Router: balance_change
-  • [2/10] vitalik.eth (Base): balance_change
+🟢 INFO (2)
+  • [?/10] bitcoin/bitcoin: commit_batch
+  • [8/10] NousResearch/hermes-agent: commit_batch
 ```
 
 ### Health Check
 ```json
 {
   "status": "healthy",
-  "poll_count": 8,
-  "targets": { "repos": 3, "contracts": 3, "wallets": 2 },
-  "github_rate_limit": { "remaining": 4937, "limit": 5000 },
+  "poll_count": 11,
+  "targets": { "repos": 3, "contracts": 3, "wallets": 0 },
+  "github_rate_limit": { "remaining": 5000, "limit": 5000 },
   "rpc_status": {
-    "base": { "ok": true, "block": 43035205 },
-    "ethereum": { "ok": true, "block": 22012841 }
+    "ethereum": { "ok": true, "block": 24606277 },
+    "base": { "ok": true, "block": 43052838 }
   },
   "supported_chains": ["base", "ethereum", "arbitrum", "optimism", "polygon"],
   "supported_tokens": {
@@ -200,7 +189,7 @@ Total alerts (24h): 8
     "base": ["USDC", "WETH", "DAI", "cbETH", "USDbC"],
     "arbitrum": ["USDC", "USDT", "WETH", "WBTC", "DAI"]
   },
-  "alerts_24h": 8
+  "alerts_24h": 6
 }
 ```
 

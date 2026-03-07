@@ -32,11 +32,20 @@ Real-time monitoring agent for GitHub repositories, onchain smart contracts, and
 ### Requirements
 - Python 3.11+ (ships with Hermes)
 - `requests` library: `pip install requests`
-- **GitHub token** (recommended): `export GITHUB_TOKEN=ghp_...` (60 req/hr without, 5000 with)
+- **GitHub token** (recommended): `export GITHUB_TOKEN=$(gh auth token)` (60 req/hr without, 5000 with)
+
+### Running Commands
+
+**Always use this pattern** when executing sentry commands via the terminal tool:
+```bash
+export GITHUB_TOKEN=$(gh auth token 2>/dev/null) && python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py <command> [args]
+```
+
+If `gh` is not available, the script still works without a token (reduced rate limits).
 
 ### First-Time Init
 ```bash
-python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py init
+export GITHUB_TOKEN=$(gh auth token 2>/dev/null) && python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py init
 ```
 Creates `~/.hermes/sentry/` with `watchlist.json`, `state.json`, and `sentry.log`.
 
@@ -46,7 +55,7 @@ All monitoring is done through the Python scripts in `scripts/`. Do NOT construc
 
 ```bash
 # ✅ CORRECT — input is validated by the script
-python3 {SKILL_DIR}/scripts/sentry.py add-repo --owner uniswap --repo v4-core
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py add-repo --owner uniswap --repo v4-core
 
 # ❌ WRONG — command injection risk
 curl https://api.github.com/repos/{user_input}/commits
@@ -59,16 +68,16 @@ curl https://api.github.com/repos/{user_input}/commits
 #### Smart Watch (auto-detects type)
 ```bash
 # GitHub repo (URL or owner/repo)
-python3 {SKILL_DIR}/scripts/sentry.py watch NousResearch/hermes-agent
-python3 {SKILL_DIR}/scripts/sentry.py watch https://github.com/bitcoin/bitcoin
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py watch NousResearch/hermes-agent
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py watch https://github.com/bitcoin/bitcoin
 
 # Onchain contract (auto-enables upgrades + balance + token tracking)
-python3 {SKILL_DIR}/scripts/sentry.py watch 0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad --label "Uniswap Router" --chain base
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py watch 0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad --label "Uniswap Router" --chain base
 ```
 
 #### GitHub Repo
 ```bash
-python3 {SKILL_DIR}/scripts/sentry.py add-repo \
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py add-repo \
   --owner <github_owner> \
   --repo <repo_name> \
   --branches main \
@@ -77,7 +86,7 @@ python3 {SKILL_DIR}/scripts/sentry.py add-repo \
 
 #### Onchain Contract (with ERC-20 & event monitoring)
 ```bash
-python3 {SKILL_DIR}/scripts/sentry.py add-contract \
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py add-contract \
   --address <0x_address> \
   --chain base \
   --label "Uniswap Router" \
@@ -93,7 +102,7 @@ Watch types:
 
 #### Wallet (with token tracking)
 ```bash
-python3 {SKILL_DIR}/scripts/sentry.py add-wallet \
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py add-wallet \
   --address <0x_address> \
   --chain base \
   --label "Treasury" \
@@ -103,7 +112,7 @@ python3 {SKILL_DIR}/scripts/sentry.py add-wallet \
 
 #### Multi-Chain Watch (same address across chains)
 ```bash
-python3 {SKILL_DIR}/scripts/sentry.py watch-multi \
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py watch-multi \
   --address <0x_address> \
   --chains base,ethereum,arbitrum \
   --label "Treasury" \
@@ -112,17 +121,17 @@ python3 {SKILL_DIR}/scripts/sentry.py watch-multi \
 
 ### 2. List Watch Targets
 ```bash
-python3 {SKILL_DIR}/scripts/sentry.py list
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py list
 ```
 
 ### 3. Remove a Watch Target
 ```bash
-python3 {SKILL_DIR}/scripts/sentry.py remove --id <target_id>
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py remove --id <target_id>
 ```
 
 ### 4. Run a Poll (Cron Task)
 ```bash
-python3 {SKILL_DIR}/scripts/sentry.py poll
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py poll
 ```
 Checks all targets, outputs formatted alerts sorted by significance. Includes:
 - Significance scores (1-10) for every alert
@@ -132,7 +141,7 @@ Checks all targets, outputs formatted alerts sorted by significance. Includes:
 
 ### 5. Generate Daily Digest
 ```bash
-python3 {SKILL_DIR}/scripts/sentry.py digest
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py digest
 ```
 Outputs an insightful summary including:
 - Trend analysis (most active sources, avg significance)
@@ -142,7 +151,7 @@ Outputs an insightful summary including:
 
 ### 6. Health Check
 ```bash
-python3 {SKILL_DIR}/scripts/sentry.py health
+python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py health
 ```
 Reports: targets watched, last poll, RPC status, rate limits, supported chains & tokens.
 
@@ -173,15 +182,15 @@ Reports: targets watched, last poll, RPC status, rate limits, supported chains &
 ```bash
 # Poll every 5 minutes
 hermes cron add --name "sentry-poll" --every 5m \
-  --task "Run sentry poll: python3 {SKILL_DIR}/scripts/sentry.py poll — then format and send any alerts above NOISE severity to the user."
+  --task "Run sentry poll: python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py poll — then format and send any alerts above NOISE severity to the user."
 
 # Daily digest at 9am
 hermes cron add --name "sentry-digest" --cron "0 9 * * *" \
-  --task "Run sentry digest: python3 {SKILL_DIR}/scripts/sentry.py digest — format as daily digest and send to user."
+  --task "Run sentry digest: python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py digest — format as daily digest and send to user."
 
 # Health check every 6 hours
 hermes cron add --name "sentry-health" --every 6h \
-  --task "Run sentry health: python3 {SKILL_DIR}/scripts/sentry.py health — alert if any sources are degraded."
+  --task "Run sentry health: python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py health — alert if any sources are degraded."
 ```
 
 ## Severity Levels
