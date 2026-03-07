@@ -1,0 +1,39 @@
+{
+  "_description": "DeFi Protocol Monitoring — Track major DeFi contracts for upgrades, balance shifts, and token movements",
+  "setup_commands": [
+    "sentry.py watch 0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad --chain base --label 'Uniswap Universal Router'",
+    "sentry.py watch 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45 --chain ethereum --label 'Uniswap SwapRouter02'",
+    "sentry.py add-contract --address 0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2 --chain ethereum --label 'Aave V3 Pool' --watch upgrades,balance,tokens,events --events Transfer,Upgraded",
+    "sentry.py watch-multi --address 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174 --chains ethereum,polygon,arbitrum --label 'USDC Bridge' --watch balance,tokens",
+    "sentry.py watch Uniswap/v4-core",
+    "sentry.py watch aave/aave-v3-core"
+  ],
+  "repos": [
+    {
+      "target": "Uniswap/v4-core",
+      "why": "Track Uniswap v4 development — new hooks, security patches"
+    },
+    {
+      "target": "aave/aave-v3-core",
+      "why": "Monitor Aave V3 for governance proposals, security fixes"
+    }
+  ],
+  "contracts": [
+    {
+      "address": "0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad",
+      "chain": "base",
+      "label": "Uniswap Universal Router",
+      "why": "Detect proxy upgrades or implementation changes"
+    },
+    {
+      "address": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+      "chain": "ethereum",
+      "label": "Aave V3 Pool",
+      "why": "Monitor for upgrades, large deposit/withdrawal events"
+    }
+  ],
+  "cron": {
+    "poll": "every 5m",
+    "digest": "0 9 * * *"
+  }
+}

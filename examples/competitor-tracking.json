@@ -1,0 +1,39 @@
+{
+  "_description": "Competitor Repo Tracking — Monitor competing projects for feature releases, security issues, and development velocity",
+  "setup_commands": [
+    "sentry.py watch openai/openai-python",
+    "sentry.py watch anthropics/anthropic-sdk-python",
+    "sentry.py watch NousResearch/hermes-agent",
+    "sentry.py watch langchain-ai/langchain",
+    "sentry.py watch crewAIInc/crewAI"
+  ],
+  "repos": [
+    {
+      "target": "openai/openai-python",
+      "why": "Track OpenAI SDK updates, new model integrations"
+    },
+    {
+      "target": "anthropics/anthropic-sdk-python",
+      "why": "Monitor Anthropic SDK for new capabilities"
+    },
+    {
+      "target": "langchain-ai/langchain",
+      "why": "Track LangChain ecosystem changes"
+    },
+    {
+      "target": "crewAIInc/crewAI",
+      "why": "Monitor multi-agent framework competition"
+    }
+  ],
+  "use_cases": [
+    "Daily digest of competitor development activity",
+    "Spot security vulnerabilities early (significance 8+)",
+    "Track feature velocity across competing projects",
+    "Detect breaking changes before they affect your integrations"
+  ],
+  "tips": [
+    "Use the significance score to prioritize: 7+ = worth reading, 4-6 = skim, 1-3 = skip",
+    "Watch for warning-level commits touching auth, security, or .sol files",
+    "Set up digest at 9am to review before standup"
+  ]
+}

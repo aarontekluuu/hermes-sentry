@@ -1,28 +1,31 @@
 ---
 name: sentry
-description: Monitor GitHub repos and onchain smart contracts for changes. Get plain-English alerts when commits land, contracts upgrade, or treasuries move. Persistent watch list with severity filtering, cron-powered polling, and daily digests.
-version: 0.2.0
+description: Monitor GitHub repos and onchain smart contracts for changes. Get plain-English alerts when commits land, contracts upgrade, tokens move, or treasuries shift. Supports ERC-20 token tracking, multi-chain monitoring, event log watching, significance scoring, and intelligent daily digests with trend analysis.
+version: 0.3.0
 author: aaronteklu
 license: MIT
 metadata:
   hermes:
-    tags: [monitoring, github, blockchain, security, contracts, alerts, crypto, base, ethereum]
+    tags: [monitoring, github, blockchain, security, contracts, alerts, crypto, base, ethereum, defi, treasury, erc20, tokens]
     category: devops
     related_skills: []
 ---
 
 # Hermes Sentry
 
-Real-time monitoring agent for GitHub repositories and onchain smart contracts.
+Real-time monitoring agent for GitHub repositories, onchain smart contracts, and crypto wallets.
 
 ## When to Use
 
 - "Watch this repo for changes"
 - "Monitor this contract for upgrades"
 - "Track this wallet's balance"
+- "Track USDC and WETH balances for this address"
+- "Watch this address on Base and Ethereum"
 - "What changed in [repo] today?"
 - "Set up alerts for [contract address]"
-- Any request involving repo monitoring, contract watching, or onchain alerts
+- "Watch for Transfer events on this contract"
+- Any request involving repo monitoring, contract watching, token tracking, or onchain alerts
 
 ## Setup
 
@@ -53,6 +56,16 @@ curl https://api.github.com/repos/{user_input}/commits
 
 ### 1. Add a Watch Target
 
+#### Smart Watch (auto-detects type)
+```bash
+# GitHub repo (URL or owner/repo)
+python3 {SKILL_DIR}/scripts/sentry.py watch NousResearch/hermes-agent
+python3 {SKILL_DIR}/scripts/sentry.py watch https://github.com/bitcoin/bitcoin
+
+# Onchain contract (auto-enables upgrades + balance + token tracking)
+python3 {SKILL_DIR}/scripts/sentry.py watch 0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad --label "Uniswap Router" --chain base
+```
+
 #### GitHub Repo
 ```bash
 python3 {SKILL_DIR}/scripts/sentry.py add-repo \
@@ -61,25 +74,40 @@ python3 {SKILL_DIR}/scripts/sentry.py add-repo \
   --branches main \
   --severity all
 ```
-Validates the repo exists and baselines the latest commit SHA.
 
-#### Onchain Contract
+#### Onchain Contract (with ERC-20 & event monitoring)
 ```bash
 python3 {SKILL_DIR}/scripts/sentry.py add-contract \
   --address <0x_address> \
   --chain base \
   --label "Uniswap Router" \
-  --watch upgrades,balance
+  --watch upgrades,balance,tokens,events \
+  --events Transfer,OwnershipTransferred
 ```
-Validates address format, fetches current bytecode hash and implementation slot, stores baseline.
 
-#### Wallet
+Watch types:
+- `upgrades` — ERC-1967 proxy upgrades + bytecode changes
+- `balance` — ETH balance movements
+- `tokens` — ERC-20 token balance tracking (USDC, WETH, DAI, WBTC, etc.)
+- `events` — Smart contract event log monitoring
+
+#### Wallet (with token tracking)
 ```bash
 python3 {SKILL_DIR}/scripts/sentry.py add-wallet \
   --address <0x_address> \
   --chain base \
   --label "Treasury" \
-  --threshold 1.0
+  --threshold 1.0 \
+  --tokens
+```
+
+#### Multi-Chain Watch (same address across chains)
+```bash
+python3 {SKILL_DIR}/scripts/sentry.py watch-multi \
+  --address <0x_address> \
+  --chains base,ethereum,arbitrum \
+  --label "Treasury" \
+  --watch upgrades,balance,tokens
 ```
 
 ### 2. List Watch Targets
@@ -96,21 +124,49 @@ python3 {SKILL_DIR}/scripts/sentry.py remove --id <target_id>
 ```bash
 python3 {SKILL_DIR}/scripts/sentry.py poll
 ```
-Checks all targets, outputs JSON array of alerts to stdout. Empty array = no changes.
-
-The agent should read the alerts and format them using the templates below before sending to the user.
+Checks all targets, outputs formatted alerts sorted by significance. Includes:
+- Significance scores (1-10) for every alert
+- AI-generated commit summaries
+- ERC-20 token balance changes
+- Event log detections
 
 ### 5. Generate Daily Digest
 ```bash
 python3 {SKILL_DIR}/scripts/sentry.py digest
 ```
-Outputs a structured summary of all changes in the last 24 hours.
+Outputs an insightful summary including:
+- Trend analysis (most active sources, avg significance)
+- Anomaly detection (unusual patterns, critical events)
+- Contributor activity
+- Alerts grouped by severity with significance scores
 
 ### 6. Health Check
 ```bash
 python3 {SKILL_DIR}/scripts/sentry.py health
 ```
-Reports: targets watched, last successful poll, any degraded sources, rate limit remaining.
+Reports: targets watched, last poll, RPC status, rate limits, supported chains & tokens.
+
+## Supported Chains
+
+| Chain | Native Token | Tracked ERC-20s |
+|-------|-------------|-----------------|
+| Ethereum | ETH | USDC, USDT, WETH, DAI, WBTC, LINK, UNI, AAVE |
+| Base | ETH | USDC, WETH, DAI, cbETH, USDbC |
+| Arbitrum | ETH | USDC, USDT, WETH, WBTC, DAI |
+| Optimism | ETH | USDC, WETH, USDT, DAI |
+| Polygon | MATIC | USDC, WETH, USDT, DAI |
+
+## Supported Event Signatures
+
+| Event | Use Case |
+|-------|----------|
+| Transfer | Token movements, NFT transfers |
+| Approval | Token spending approvals |
+| OwnershipTransferred | Contract ownership changes |
+| Upgraded | Proxy implementation upgrades |
+| AdminChanged | Proxy admin changes |
+| Paused / Unpaused | Contract pause events |
+| RoleGranted / RoleRevoked | Access control changes |
 
 ## Cron Setup
 
@@ -132,79 +188,91 @@ hermes cron add --name "sentry-health" --every 6h \
 
 | Level | Meaning | Examples |
 |-------|---------|----------|
-| 🔴 **CRITICAL** | Immediate attention | Contract upgrade, proxy impl change, large treasury drain, security advisory |
-| 🟡 **WARNING** | Worth reviewing | Security-related commits, new release, unusual wallet activity, ownership transfer |
+| 🔴 **CRITICAL** | Immediate attention | Contract upgrade, proxy impl change, large treasury drain, 50%+ token balance shift |
+| 🟡 **WARNING** | Worth reviewing | Security-related commits, new release, unusual wallet activity, ownership transfer, token movements |
 | 🟢 **INFO** | Routine | Normal commits, small balance changes, test updates |
 | ⚪ **NOISE** | Filtered by default | Bot commits, dep bumps, formatting, CI config, lockfile changes |
 
+## Significance Scores (1-10)
+
+Every alert includes a significance score to help prioritize:
+
+| Score | Priority | Action |
+|-------|----------|--------|
+| 8-10 | 🔥 Critical | Read immediately |
+| 5-7 | ⚡ Important | Review soon |
+| 3-4 | 📋 Normal | Check when free |
+| 1-2 | 💤 Low | Skip unless relevant |
+
+Scores are computed from: file types changed, commit message keywords, change volume, directory spread, and pattern matching.
+
 ## Alert Templates
 
-### Commit Alert
+### Commit Alert (with summary & significance)
 ```
-{severity_emoji} SENTRY: {owner}/{repo}
+{severity_emoji} {owner}/{repo}
 ━━━━━━━━━━━━━━━━━━━━━
-{plain_english_summary}
+{commit_message}
+💡 {ai_generated_summary}
 
+Significance: {sig_bar} {score}/10
 Files: {file_count} changed (+{insertions} -{deletions})
-Author: {author}
-Commit: {short_sha}
-Link: {url}
+Author: {author} • {short_sha}
+{url}
 ```
 
-### Batch Commit Alert (3+ commits grouped)
+### Token Balance Alert
 ```
-🟢 SENTRY: {owner}/{repo} — {count} new commits
+{severity_emoji} 💰 {label} — {token_symbol}
 ━━━━━━━━━━━━━━━━━━━━━
-{grouped_summary}
-
-Top change: {most_significant_commit_summary}
-Authors: {unique_authors}
-Period: {first_commit_time} → {last_commit_time}
-```
-
-### Contract Upgrade Alert
-```
-🔴 SENTRY: Contract Upgrade Detected
-━━━━━━━━━━━━━━━━━━━━━
-{label} on {chain}
+Significance: {sig_bar} {score}/10
+Chain: {chain}
 Address: {address}
 
-Old implementation: {old_impl}
-New implementation: {new_impl}
+{old_balance} → {new_balance} {symbol}
+Change: {change_pct}
 
-⚠️ Review before interacting.
-Explorer: {explorer_url}
+{explorer_url}
 ```
 
-### Treasury Movement Alert
+### Event Log Alert
 ```
-🟡 SENTRY: Treasury Movement
+{severity_emoji} 📜 {label} — {event_name} events
 ━━━━━━━━━━━━━━━━━━━━━
-{label} on {chain}
+Significance: {sig_bar} {score}/10
+Chain: {chain}
 Address: {address}
 
-{old_balance} → {new_balance} ETH ({delta_direction} {abs_delta})
-Threshold: {threshold} ETH
+{count} events detected:
+  • {value} {symbol} from {from}... → {to}...
 
-Explorer: {explorer_url}
+{explorer_url}
 ```
 
-### Daily Digest
+### Daily Digest (with trends)
 ```
-📊 SENTRY: Daily Digest — {date}
+📊 SENTRY DAILY DIGEST — {date}
 ━━━━━━━━━━━━━━━━━━━━━
+Watching: {repos} repos, {contracts} contracts, {wallets} wallets
+Total alerts (24h): {total}
 
-📁 Repos ({count} watched, {changes} with changes)
-{per_repo_summary}
+📈 TRENDS & PATTERNS
+  🏆 Most active: {source} ({count} alerts)
+  📊 Avg significance: {avg}/10
+  👥 Active contributors: {authors}
 
-⛓️ Contracts ({count} watched)
-{contract_summary_or_no_changes}
+  ⚠️ ANOMALIES:
+    • {anomaly_description}
 
-💰 Wallets ({count} watched)
-{wallet_summary_or_no_changes}
-
-🏥 Health: {status}
+{severity_grouped_alerts}
 ```
+
+## Example Watchlist Configs
+
+See `examples/` directory for ready-to-use configurations:
+- **`defi-monitoring.json`** — Track Uniswap, Aave, and major DeFi protocols
+- **`dao-treasury.json`** — Monitor DAO treasuries, multisigs, and governance repos
+- **`competitor-tracking.json`** — Watch competitor repos for feature releases and security patches
 
 ## Security Notes
 
@@ -212,20 +280,24 @@ Explorer: {explorer_url}
 - No shell interpolation of user-supplied values — all external calls use `requests` library
 - Watchlist file permissions are set to 600 (owner-only read/write)
 - GitHub tokens are read from env vars, never stored in watchlist
-- Public RPCs can be unreliable or compromised — for high-value monitoring, use private RPCs
+- Public RPCs can be unreliable — for high-value monitoring, use private RPCs
 - State file uses atomic writes (write to temp, then rename) to prevent corruption
+- ERC-20 balanceOf calls use validated contract addresses from a curated registry
 
 ## Pitfalls
 
 - **Rate limits**: GitHub without token = 60 req/hr. Set `GITHUB_TOKEN` for production.
 - **Public RPCs**: May throttle or return stale data. Sentry logs RPC errors and reports degraded health.
-- **Proxy contracts**: Sentry checks ERC-1967 implementation slot automatically for any contract. Non-proxy contracts are monitored via bytecode hash.
+- **Proxy contracts**: Sentry checks ERC-1967 implementation slot automatically. Non-proxy contracts are monitored via bytecode hash.
 - **Cold start**: First poll after adding a target only baselines — no alerts fire. Changes trigger on subsequent polls.
-- **Large diffs**: Diffs are truncated to 500 lines per file, 2000 lines total per commit in the poll output.
+- **Token dust**: Balances under 0.01 are ignored to avoid noise from dust amounts.
+- **Event log range**: Event queries scan the last 5000 blocks by default. Adjust for chains with fast block times.
 
 ## Verification
 
 1. Add a repo you control: `sentry.py add-repo --owner you --repo test`
 2. Push a commit to that repo
 3. Run `sentry.py poll`
-4. Confirm alert JSON appears in stdout
+4. Confirm alert with significance score appears in stdout
+5. Test multi-chain: `sentry.py watch-multi --address 0x... --chains base,ethereum`
+6. Run `sentry.py digest` and verify trends section

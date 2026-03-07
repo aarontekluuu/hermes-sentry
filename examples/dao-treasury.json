@@ -1,0 +1,33 @@
+{
+  "_description": "DAO Treasury Monitoring — Track treasury wallets, multisigs, and governance repos across chains",
+  "setup_commands": [
+    "sentry.py watch-multi --address 0x0BC3807Ec262cB779b38D65b38FA7D6742F3a04 --chains ethereum,base,arbitrum --label 'DAO Treasury' --watch balance,tokens --threshold 10.0",
+    "sentry.py add-wallet --address 0x28849D2b63fA8D361e5fc15cB8AbbB7386F55642 --chain ethereum --label 'Gnosis Safe Multisig' --threshold 5.0 --tokens",
+    "sentry.py watch compound-finance/compound-protocol",
+    "sentry.py watch makerdao/dss"
+  ],
+  "wallets": [
+    {
+      "address": "0x28849D2b63fA8D361e5fc15cB8AbbB7386F55642",
+      "chain": "ethereum",
+      "label": "Gnosis Safe Multisig",
+      "why": "Monitor treasury outflows, unusual withdrawals"
+    }
+  ],
+  "repos": [
+    {
+      "target": "compound-finance/compound-protocol",
+      "why": "Track governance proposals and protocol changes"
+    },
+    {
+      "target": "makerdao/dss",
+      "why": "Monitor MakerDAO core contracts for stability updates"
+    }
+  ],
+  "alerts_to_watch_for": [
+    "Large ETH outflows (>10 ETH) from treasury",
+    "USDC/USDT movements above $50k",
+    "Proxy contract upgrades on any chain",
+    "New governance proposals in repos"
+  ]
+}
