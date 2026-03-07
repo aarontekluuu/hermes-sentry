@@ -34,22 +34,24 @@ You can't watch everything. Your agent can.
 ### Install as Hermes Skill
 
 ```bash
-mkdir -p ~/.hermes/skills/devops/sentry
-cp -r * ~/.hermes/skills/devops/sentry/
-python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py init
+# Clone anywhere — the skill uses relative paths
+git clone https://github.com/aarontekluuu/hermes-sentry.git
+cd hermes-sentry
+python3 scripts/sentry.py init
 ```
 
-Or install from GitHub:
+Or copy into your Hermes skills directory:
 ```bash
-mkdir -p ~/.hermes/skills/devops/sentry
-git clone https://github.com/aarontekluuu/hermes-sentry.git ~/.hermes/skills/devops/sentry/
-python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py init
+cp -r hermes-sentry ~/.hermes/skills/devops/sentry
+cd ~/.hermes/skills/devops/sentry
+python3 scripts/sentry.py init
 ```
 
 ### Usage
 
 ```bash
-SENTRY="python3 ~/.hermes/skills/devops/sentry/scripts/sentry.py"
+# Run from the skill's root directory
+SENTRY="python3 scripts/sentry.py"
 
 # Initialize
 $SENTRY init
@@ -275,7 +277,7 @@ hermes cron add --name "sentry-health" --every 6h \
 ├── state.json        # Poll history, 24h alert buffer, trend data
 └── sentry.log        # Execution logs
 
-~/.hermes/skills/devops/sentry/
+hermes-sentry/              # Install anywhere — uses relative paths
 ├── SKILL.md          # Hermes skill definition (agentskills.io spec)
 ├── README.md
 ├── scripts/

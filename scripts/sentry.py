@@ -359,6 +359,12 @@ def format_token_balance(raw_balance: int, decimals: int) -> str:
     display_decimals = min(decimals, 4)
     return f"{whole}.{frac_str[:display_decimals]}"
 
+def format_eth_balance(balance: Optional[float]) -> Optional[str]:
+    """Format an ETH balance for display, returning None if balance is None."""
+    if balance is None:
+        return None
+    return f"{balance:.6f}"
+
 def get_all_token_balances(rpc_url: str, address: str, chain: str) -> dict[str, str]:
     """Get balances for all known ERC-20 tokens on a chain."""
     tokens = ERC20_TOKENS.get(chain, {})
@@ -1333,7 +1339,7 @@ def cmd_add_contract(args: argparse.Namespace) -> None:
         "is_proxy": is_proxy,
         "impl_address": impl_addr,
         "code_hash": code_hash[:16] + "..." if code_hash else None,
-        "balance_eth": f"{balance:.6f}" if balance is not None else None,
+        "balance_eth": format_eth_balance(balance),
     }
     if token_balances:
         result["token_balances"] = token_balances
@@ -1376,7 +1382,7 @@ def cmd_add_wallet(args: argparse.Namespace) -> None:
     result = {
         "ok": True,
         "message": f"Now watching wallet {target_id}",
-        "balance_eth": f"{balance:.6f}" if balance is not None else None,
+        "balance_eth": format_eth_balance(balance),
     }
     if token_balances:
         result["token_balances"] = token_balances
@@ -1457,7 +1463,7 @@ def cmd_watch_multi(args: argparse.Namespace) -> None:
                 results.append({
                     "chain": chain, "type": "contract",
                     "is_proxy": impl_addr is not None,
-                    "balance": f"{balance:.6f}" if balance is not None else None,
+                    "balance": format_eth_balance(balance),
                     "tokens": token_balances if token_balances else None,
                 })
             else:
