@@ -1,7 +1,7 @@
 ---
 name: sentry
 description: Monitor GitHub repos and onchain smart contracts for changes. Get plain-English alerts when commits land, contracts upgrade, tokens move, or treasuries shift. Supports ERC-20 token tracking, multi-chain monitoring, event log watching, significance scoring, and intelligent daily digests with trend analysis.
-version: 0.3.0
+version: 0.3.1
 author: aaronteklu
 license: MIT
 metadata:

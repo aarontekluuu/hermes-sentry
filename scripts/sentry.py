@@ -1688,7 +1688,8 @@ def cmd_health(_args: argparse.Namespace) -> None:
         stale = minutes_since > 15
 
     health = {
-        "status": "degraded" if stale or state.get("errors") else "healthy",
+        "version": VERSION,
+        "status": "degraded" if (stale and state.get("poll_count", 0) > 0) or state.get("errors") else "healthy",
         "last_poll": last_poll,
         "stale": stale,
         "poll_count": state.get("poll_count", 0),
@@ -1715,8 +1716,11 @@ def cmd_health(_args: argparse.Namespace) -> None:
 
 # ─── CLI Parser ───────────────────────────────────────────────────────────────
 
+VERSION = "0.3.1"
+
 def main():
     parser = argparse.ArgumentParser(prog="sentry", description="Hermes Sentry — Repo & Contract Monitor")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
     sub = parser.add_subparsers(dest="command", required=True)
 
     # init
